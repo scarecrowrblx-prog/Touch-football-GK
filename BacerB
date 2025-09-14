@@ -1,128 +1,183 @@
--- Touch Football GK GUI (Compact + Full)
-local P,S,T=game.Players.LocalPlayer,game:GetService("TweenService"),game:GetService("Players")
-local G=P:WaitForChild("PlayerGui")
-local gui=Instance.new("ScreenGui",G)
-gui.IgnoreGuiInset=true
-local f=Instance.new("Frame",gui)
-f.Size=UDim2.new(0,350,0,180)
-f.Position=UDim2.new(0,20,0,70)
-f.BackgroundColor3=Color3.fromRGB(30,30,30)
+-- Full Touch Football GK GUI with draggable GK square
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local guiParent = player:WaitForChild("PlayerGui")
 
-local title=Instance.new("TextLabel",f)
-title.Size=UDim2.new(1,-16,0,28)
-title.Position=UDim2.new(0,8,0,6)
-title.BackgroundTransparency=1
-title.Text="Touch football gk Gui"
-title.TextColor3=Color3.new(1,1,1)
-title.Font=Enum.Font.SourceSansBold
-title.TextSize=20
-title.TextXAlignment=Enum.TextXAlignment.Left
+-- Main ScreenGui
+local screenGui = Instance.new("ScreenGui", guiParent)
+screenGui.IgnoreGuiInset = true
 
-local credits=Instance.new("TextLabel",f)
-credits.Size=UDim2.new(1,-16,0,16)
-credits.Position=UDim2.new(0,8,0,34)
-credits.BackgroundTransparency=1
-credits.Text="credits to Bored scripts on discord for the script"
-credits.TextColor3=Color3.new(150/255,150/255,150/255)
-credits.Font=Enum.Font.SourceSansItalic
-credits.TextSize=12
-credits.TextXAlignment=Enum.TextXAlignment.Left
+-- Main Frame (Draggable)
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 250, 0, 160)
+mainFrame.Position = UDim2.new(0, 100, 0, 100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+mainFrame.Active = true
+mainFrame.Draggable = true
 
-local status=Instance.new("TextLabel",f)
-status.Size=UDim2.new(1,-16,0,20)
-status.Position=UDim2.new(0,8,0,56)
-status.BackgroundTransparency=1
-status.Text="Status: OFF"
-status.TextColor3=Color3.new(200/255,200/255,200/255)
-status.Font=Enum.Font.SourceSans
-status.TextSize=14
-status.TextXAlignment=Enum.TextXAlignment.Left
+-- Title
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1,-16,0,20)
+title.Position = UDim2.new(0,8,0,8)
+title.BackgroundTransparency = 1
+title.Text = "Touch Football GK"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
 
-local onB=Instance.new("TextButton",f)
-onB.Size=UDim2.new(0.48,-6,0,40)
-onB.Position=UDim2.new(0,8,0,85)
-onB.Text="ON"
-onB.Font=Enum.Font.SourceSansBold
-onB.TextSize=18
-onB.BackgroundColor3=Color3.fromRGB(40,160,40)
-onB.TextColor3=Color3.new(1,1,1)
+-- Close/Toggle X button (top-right)
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0, 24, 0, 24)
+closeBtn.Position = UDim2.new(1, -28, 0, 4)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 18
 
-local offB=Instance.new("TextButton",f)
-offB.Size=UDim2.new(0.48,-6,0,40)
-offB.Position=UDim2.new(0.52,-6,0,85)
-offB.Text="OFF"
-offB.Font=Enum.Font.SourceSansBold
-offB.TextSize=18
-offB.BackgroundColor3=Color3.fromRGB(160,40,40)
-offB.TextColor3=Color3.new(1,1,1)
+-- Status
+local status = Instance.new("TextLabel", mainFrame)
+status.Size = UDim2.new(1,-16,0,18)
+status.Position = UDim2.new(0,8,0,32)
+status.BackgroundTransparency = 1
+status.Text = "Status: OFF"
+status.TextColor3 = Color3.fromRGB(200,200,200)
+status.Font = Enum.Font.SourceSans
+status.TextSize = 14
+status.TextXAlignment = Enum.TextXAlignment.Left
 
-local discordB=Instance.new("TextButton",f)
-discordB.Size=UDim2.new(0,140,0,30)
-discordB.Position=UDim2.new(0,8,0,135)
-discordB.BackgroundColor3=Color3.fromRGB(88,101,242)
-discordB.Text="BacerB Discord"
-discordB.Font=Enum.Font.SourceSansBold
-discordB.TextSize=14
-discordB.TextColor3=Color3.new(1,1,1)
+-- ON Button
+local onB = Instance.new("TextButton", mainFrame)
+onB.Size = UDim2.new(0.48,-6,0,30)
+onB.Position = UDim2.new(0,8,0,56)
+onB.Text = "ON"
+onB.Font = Enum.Font.SourceSansBold
+onB.TextSize = 16
+onB.BackgroundColor3 = Color3.fromRGB(40,160,40)
+onB.TextColor3 = Color3.new(1,1,1)
 
-local discordD=Instance.new("TextButton",f)
-discordD.Size=UDim2.new(0,140,0,30)
-discordD.Position=UDim2.new(0,182,0,135)
-discordD.BackgroundColor3=Color3.fromRGB(114,137,218)
-discordD.Text="Dev Discord"
-discordD.Font=Enum.Font.SourceSansBold
-discordD.TextSize=14
-discordD.TextColor3=Color3.new(1,1,1)
+-- OFF Button
+local offB = Instance.new("TextButton", mainFrame)
+offB.Size = UDim2.new(0.48,-6,0,30)
+offB.Position = UDim2.new(0.52,-6,0,56)
+offB.Text = "OFF"
+offB.Font = Enum.Font.SourceSansBold
+offB.TextSize = 16
+offB.BackgroundColor3 = Color3.fromRGB(160,40,40)
+offB.TextColor3 = Color3.new(1,1,1)
 
-local GK=false
-local connections={}
+-- Discord Buttons
+local discordB = Instance.new("TextButton", mainFrame)
+discordB.Size = UDim2.new(0,110,0,25)
+discordB.Position = UDim2.new(0,8,0,120)
+discordB.BackgroundColor3 = Color3.fromRGB(88,101,242)
+discordB.Text = "BacerB Discord"
+discordB.Font = Enum.Font.SourceSansBold
+discordB.TextSize = 14
+discordB.TextColor3 = Color3.new(1,1,1)
+
+local discordD = Instance.new("TextButton", mainFrame)
+discordD.Size = UDim2.new(0,110,0,25)
+discordD.Position = UDim2.new(0,132,0,120)
+discordD.BackgroundColor3 = Color3.fromRGB(114,137,218)
+discordD.Text = "Dev Discord"
+discordD.Font = Enum.Font.SourceSansBold
+discordD.TextSize = 14
+discordD.TextColor3 = Color3.new(1,1,1)
+
+-- Draggable GK Square (hidden by default)
+local gkSquare = Instance.new("Frame", screenGui)
+gkSquare.Size = UDim2.new(0, 100, 0, 100)
+gkSquare.Position = UDim2.new(0, 150, 0, 250)
+gkSquare.BackgroundColor3 = Color3.fromRGB(0,150,0)
+gkSquare.Visible = false
+gkSquare.Active = true
+gkSquare.Draggable = true
+
+local gkLabel = Instance.new("TextLabel", gkSquare)
+gkLabel.Size = UDim2.new(1,0,1,0)
+gkLabel.BackgroundTransparency = 1
+gkLabel.Text = "GK"
+gkLabel.TextColor3 = Color3.new(1,1,1)
+gkLabel.Font = Enum.Font.SourceSansBold
+gkLabel.TextSize = 24
+gkLabel.TextScaled = true
+
+-- Toggle GK square visibility
+closeBtn.MouseButton1Click:Connect(function()
+    gkSquare.Visible = not gkSquare.Visible
+end)
+
+-- GK Script Logic
+local GK = false
+local connections = {}
 
 local function runGK()
 	if not GK then return end
-	local char=P.Character or P.CharacterAdded:Wait()
-	local field=workspace:WaitForChild("FootballField")
-	local ball=field:FindFirstChild("SoccerBall")
-	local diveIds={"rbxassetid://16428780736","rbxassetid://16428788224","rbxassetid://16428773038","rbxassetid://16428797277"}
-	local function updateBall() ball=field:FindFirstChild("SoccerBall") end
+	local char = player.Character or player.CharacterAdded:Wait()
+	local field = workspace:WaitForChild("FootballField")
+	local ball = field:FindFirstChild("SoccerBall")
+	local diveIds = {"rbxassetid://16428780736","rbxassetid://16428788224","rbxassetid://16428773038","rbxassetid://16428797277"}
+	local function updateBall() ball = field:FindFirstChild("SoccerBall") end
 	local function teleportBall()
 		if char and ball then
-			local hrp=char:FindFirstChild("HumanoidRootPart")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
-				local pos=hrp.CFrame + (hrp.CFrame.LookVector*2)
-				if ball:IsA("BasePart") then ball.CFrame=pos elseif ball:IsA("Model") and ball.PrimaryPart then ball:SetPrimaryPartCFrame(pos) end
+				local pos = hrp.CFrame + (hrp.CFrame.LookVector*2)
+				if ball:IsA("BasePart") then
+					ball.CFrame = pos
+				elseif ball:IsA("Model") and ball.PrimaryPart then
+					ball:SetPrimaryPartCFrame(pos)
+				end
 			end
 		end
 	end
-	local humanoid=char:WaitForChild("Humanoid")
-	local animator=humanoid:FindFirstChildOfClass("Animator")
+	local humanoid = char:WaitForChild("Humanoid")
+	local animator = humanoid:FindFirstChildOfClass("Animator")
 	if animator then
-		local conn=animator.AnimationPlayed:Connect(function(track)
+		local conn = animator.AnimationPlayed:Connect(function(track)
 			if not GK then return end
-			if table.find(diveIds,track.Animation.AnimationId) then teleportBall() end
+			if table.find(diveIds, track.Animation.AnimationId) then
+				teleportBall()
+			end
 		end)
-		table.insert(connections,conn)
+		table.insert(connections, conn)
 	end
-	local conn2=field.ChildAdded:Connect(function(c) if c.Name=="SoccerBall" then ball=c end end)
-	table.insert(connections,conn2)
+	local conn2 = field.ChildAdded:Connect(function(c) if c.Name=="SoccerBall" then ball=c end end)
+	table.insert(connections, conn2)
 	updateBall()
 end
 
+-- ON/OFF buttons
 onB.MouseButton1Click:Connect(function()
-	if not GK then GK=true;status.Text="Status: ON";status.TextColor3=Color3.fromRGB(0,255,0);runGK() end
+	if not GK then
+		GK = true
+		status.Text = "Status: ON"
+		status.TextColor3 = Color3.fromRGB(0,255,0)
+		runGK()
+	end
 end)
 
 offB.MouseButton1Click:Connect(function()
-	if GK then GK=false;status.Text="Status: OFF";status.TextColor3=Color3.fromRGB(255,0,0);for _,c in pairs(connections) do c:Disconnect() end;connections={} end
+	if GK then
+		GK = false
+		status.Text = "Status: OFF"
+		status.TextColor3 = Color3.fromRGB(255,0,0)
+		for _,c in pairs(connections) do c:Disconnect() end
+		connections = {}
+	end
 end)
 
+-- Discord buttons
 discordB.MouseButton1Click:Connect(function()
 	if setclipboard then setclipboard("https://discord.gg/TmbjdmFZ") end
-	status.Text="BacerB's discord copied 📋"
-	task.delay(2,function() status.Text="Status: "..(GK and "ON" or "OFF") end)
+	status.Text = "BacerB's discord copied 📋"
+	task.delay(2,function() status.Text = "Status: "..(GK and "ON" or "OFF") end)
 end)
 
 discordD.MouseButton1Click:Connect(function()
 	if setclipboard then setclipboard("https://discord.gg/W9kkzz8t") end
-	status.Text="Script dev's discord copied 📋"
-	task.delay(2,function() status.Text="Status: "..(GK and "ON" or "OFF") end)
+	status.Text = "Script dev's discord copied 📋"
+	task.delay(2,function() status.Text = "Status: "..(GK and "ON" or "OFF") end)
 end)
