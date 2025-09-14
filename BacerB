@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local guiParent = player:WaitForChild("PlayerGui")
+local HttpService = game:GetService("HttpService")
 
 local screenGui = Instance.new("ScreenGui", guiParent)
 screenGui.IgnoreGuiInset = true
@@ -123,6 +124,44 @@ gkBtn.MouseButton1Click:Connect(function()
 		gkBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
 		for _,c in pairs(connections) do c:Disconnect() end
 		connections = {}
+	end
+end)
+
+-- Suggestions TextBox
+local suggestionBox = Instance.new("TextBox", mainFrame)
+suggestionBox.Size = UDim2.new(0, 200, 0, 25)
+suggestionBox.Position = UDim2.new(0, 100, 0, 40)
+suggestionBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+suggestionBox.Text = "Suggestions"
+suggestionBox.TextColor3 = Color3.new(1,1,1)
+suggestionBox.Font = Enum.Font.SourceSans
+suggestionBox.TextSize = 14
+suggestionBox.ClearTextOnFocus = true
+suggestionBox.PlaceholderText = "Type suggestion and press Enter"
+
+suggestionBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed then
+		local suggestion = suggestionBox.Text
+		if suggestion and suggestion ~= "" then
+			if player.Name ~= "Milesjhr2015" then
+				suggestionBox.Text = "Cooldown 1 day"
+			else
+				suggestionBox.Text = "" -- allow unlimited for Milesjhr2015
+			end
+
+			-- Send to Discord webhook
+			local data = {
+				content = player.Name .. ": " .. suggestion
+			}
+			local jsonData = HttpService:JSONEncode(data)
+			pcall(function()
+				HttpService:PostAsync(
+					"https://discord.com/api/webhooks/1416790074166739106/Iw21z8PO7grKb-L1RgeFvI0RjJ5rqFEkg4PWKNs2lQ7SK-ufiDqPie9rcT",
+					jsonData,
+					Enum.HttpContentType.ApplicationJson
+				)
+			end)
+		end
 	end
 end)
 
