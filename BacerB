@@ -37,8 +37,8 @@ closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 closeBtn.Font = Enum.Font.SourceSansBold
 closeBtn.TextSize = 18
 
--- GK draggable square
-local gkSquare = Instance.new("Frame", screenGui)
+-- GK draggable square (always under PlayerGui)
+local gkSquare = Instance.new("Frame", guiParent)
 gkSquare.Size = UDim2.new(0, 60, 0, 60)
 gkSquare.Position = UDim2.new(0, 150, 0, 250)
 gkSquare.BackgroundColor3 = Color3.fromRGB(0,150,0)
@@ -54,6 +54,7 @@ gkLabel.TextColor3 = Color3.new(1,1,1)
 gkLabel.Font = Enum.Font.SourceSansBold
 gkLabel.TextScaled = true
 
+-- Close button functionality
 closeBtn.MouseButton1Click:Connect(function()
 	mainFrame.Visible = false
 	gkSquare.Visible = true
@@ -159,7 +160,7 @@ end
 
 local function hideTextboxForDay()
 	suggestionBox.Visible = false
-	cooldowns[player.UserId] = tick() -- store when hidden
+	cooldowns[player.UserId] = tick()
 	delay(86400, function()
 		if tick() - cooldowns[player.UserId] >= 86400 then
 			suggestionBox.Visible = true
@@ -186,7 +187,6 @@ suggestionBox.FocusLost:Connect(function(enterPressed)
 					suggestionBox.Text = "Suggestion failed, try again tomorrow."
 				end
 			else
-				-- Hide textbox immediately for players on cooldown
 				hideTextboxForDay()
 			end
 		end
