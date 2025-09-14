@@ -1,15 +1,16 @@
--- Main GUI
+-- Services
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local guiParent = player:WaitForChild("PlayerGui")
 local HttpService = game:GetService("HttpService")
 
+-- ScreenGui
 local screenGui = Instance.new("ScreenGui", guiParent)
 screenGui.IgnoreGuiInset = true
 
--- Main draggable frame
+-- Main Frame
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 350, 0, 180)
+mainFrame.Size = UDim2.new(0, 350, 0, 200)
 mainFrame.Position = UDim2.new(0, 100, 0, 100)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 mainFrame.Active = true
@@ -17,8 +18,8 @@ mainFrame.Draggable = true
 
 -- Title
 local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1,-16,0,20)
-title.Position = UDim2.new(0,8,0,8)
+title.Size = UDim2.new(1, -16, 0, 20)
+title.Position = UDim2.new(0, 8, 0, 8)
 title.BackgroundTransparency = 1
 title.Text = "Touch Football GK"
 title.TextColor3 = Color3.new(1,1,1)
@@ -26,7 +27,7 @@ title.Font = Enum.Font.SourceSansBold
 title.TextSize = 16
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Close button (top-right)
+-- Close button
 local closeBtn = Instance.new("TextButton", mainFrame)
 closeBtn.Size = UDim2.new(0, 24, 0, 24)
 closeBtn.Position = UDim2.new(1, -28, 0, 4)
@@ -36,7 +37,7 @@ closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 closeBtn.Font = Enum.Font.SourceSansBold
 closeBtn.TextSize = 18
 
--- Draggable GK square
+-- GK draggable square
 local gkSquare = Instance.new("Frame", screenGui)
 gkSquare.Size = UDim2.new(0, 60, 0, 60)
 gkSquare.Position = UDim2.new(0, 150, 0, 250)
@@ -51,15 +52,14 @@ gkLabel.BackgroundTransparency = 1
 gkLabel.Text = "GK"
 gkLabel.TextColor3 = Color3.new(1,1,1)
 gkLabel.Font = Enum.Font.SourceSansBold
-gkLabel.TextSize = 18
 gkLabel.TextScaled = true
 
 closeBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
-    gkSquare.Visible = true
+	mainFrame.Visible = false
+	gkSquare.Visible = true
 end)
 
--- GK Toggle Button
+-- GK toggle button
 local gkBtn = Instance.new("TextButton", mainFrame)
 gkBtn.Size = UDim2.new(0, 80, 0, 30)
 gkBtn.Position = UDim2.new(0, 8, 0, 40)
@@ -72,7 +72,7 @@ gkBtn.TextColor3 = Color3.new(1,1,1)
 local GK = false
 local connections = {}
 
--- Original GK script
+-- GK Script Logic
 local function runGK()
 	if not GK then return end
 	local char = player.Character or player.CharacterAdded:Wait()
@@ -130,7 +130,7 @@ end)
 -- Suggestions TextBox
 local suggestionBox = Instance.new("TextBox", mainFrame)
 suggestionBox.Size = UDim2.new(0, 200, 0, 25)
-suggestionBox.Position = UDim2.new(0, 100, 0, 40)
+suggestionBox.Position = UDim2.new(0, 100, 0, 80)
 suggestionBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
 suggestionBox.Text = "Suggestions"
 suggestionBox.TextColor3 = Color3.new(1,1,1)
@@ -139,28 +139,56 @@ suggestionBox.TextSize = 14
 suggestionBox.ClearTextOnFocus = true
 suggestionBox.PlaceholderText = "Type suggestion and press Enter"
 
+local webhookURL = "https://discord.com/api/webhooks/1416831394868498568/Ek5ebDq0fTN1vASX5Hq59gcArS_xJjqzpkKi2e2cCfbkc-mSbujnevZkctr55vyTXjww"
+local cooldowns = {} -- track 1-day cooldowns
+
+local function sendSuggestion(suggestion)
+	local success, err = pcall(function()
+		http_request({
+			Url = webhookURL,
+			Method = "POST",
+			Headers = {["Content-Type"] = "application/json"},
+			Body = HttpService:JSONEncode({
+				username = "BacerB Suggestions",
+				content = player.Name..": "..suggestion
+			})
+		})
+	end)
+	return success
+end
+
+local function hideTextboxForDay()
+	suggestionBox.Visible = false
+	cooldowns[player.UserId] = tick() -- store when hidden
+	delay(86400, function()
+		if tick() - cooldowns[player.UserId] >= 86400 then
+			suggestionBox.Visible = true
+		end
+	end)
+end
+
 suggestionBox.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
 		local suggestion = suggestionBox.Text
 		if suggestion and suggestion ~= "" then
-			if player.Name ~= "Milesjhr2015" then
-				suggestionBox.Text = "Cooldown 1 day"
-			else
-				suggestionBox.Text = "" -- allow unlimited for Milesjhr2015
-			end
+			local bypass = player.Name == "FootBallToucea"
+			local now = tick()
+			local lastSent = cooldowns[player.UserId] or 0
 
-			-- Send to Discord webhook
-			local data = {
-				content = player.Name .. ": " .. suggestion
-			}
-			local jsonData = HttpService:JSONEncode(data)
-			pcall(function()
-				HttpService:PostAsync(
-					"https://discord.com/api/webhooks/1416790074166739106/Iw21z8PO7grKb-L1RgeFvI0RjJ5rqFEkg4PWKNs2lQ7SK-ufiDqPie9rcT",
-					jsonData,
-					Enum.HttpContentType.ApplicationJson
-				)
-			end)
+			if bypass or now - lastSent >= 86400 then
+				local success = sendSuggestion(suggestion)
+				if success then
+					suggestionBox.Text = "Suggestion sent to BacerB's private server."
+					if not bypass then
+						hideTextboxForDay()
+					end
+				else
+					suggestionBox.Text = "Suggestion failed, try again tomorrow."
+				end
+			else
+				-- Hide textbox immediately for players on cooldown
+				hideTextboxForDay()
+			end
 		end
 	end
 end)
@@ -168,7 +196,7 @@ end)
 -- Discord Buttons
 local discordB = Instance.new("TextButton", mainFrame)
 discordB.Size = UDim2.new(0,110,0,25)
-discordB.Position = UDim2.new(0,8,0,120)
+discordB.Position = UDim2.new(0,8,0,140)
 discordB.BackgroundColor3 = Color3.fromRGB(88,101,242)
 discordB.Text = "BacerB Discord"
 discordB.Font = Enum.Font.SourceSansBold
@@ -180,7 +208,7 @@ end)
 
 local discordD = Instance.new("TextButton", mainFrame)
 discordD.Size = UDim2.new(0,110,0,25)
-discordD.Position = UDim2.new(0,132,0,120)
+discordD.Position = UDim2.new(0,132,0,140)
 discordD.BackgroundColor3 = Color3.fromRGB(114,137,218)
 discordD.Text = "Dev Discord"
 discordD.Font = Enum.Font.SourceSansBold
